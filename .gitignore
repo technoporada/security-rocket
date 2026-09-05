@@ -1,0 +1,17 @@
+# runtime logs
+*.log
+hardening_runs/
+
+# junk / scratch
+_bledy/
+jebac_muzyke/
+OLD/
+
+# python
+__pycache__/
+.venv/
+venv/
+
+# os
+.DS_Store
+*.swp
