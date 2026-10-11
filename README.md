@@ -29,6 +29,7 @@ masz drugi sposób dostępu do maszyny.
 | `apply_and_verify.sh` | Uruchamia hardening, testuje, analizuje wynik i robi rollback przy krytycznym błędzie (brak SSH). |
 | `ufw_manager.sh` | Reguły UFW: wchodzące `deny`, wychodzące `allow`. Bez argumentów. Resetuje UFW na wejściu. |
 | `security_report.sh` | Raport bezpieczeństwa: porty, SSH, UFW, AppArmor, AIDE. |
+| `system_audit.sh` | Zbiera stan systemu do jednego pliku w `/tmp`: logowania, porty, cron, usługi, zmienione pliki w `/etc`, lista kluczy SSH. **Tylko odczyt.** Plik zawiera dane wrażliwe — nie wklejaj go do repozytorium. |
 | `system_check.sh` | Ogólny przegląd systemu: dysk, pamięć, failed services, błędy w logach, aktualizacje. |
 | `areknet_system_utils.sh` | Narzędzia systemowe w menu `dialog` (procesy, sieć, użytkownicy). |
 | `areknet_firewall_menu.sh` | Menu firewall / UFW. |
@@ -45,6 +46,13 @@ sudo ./apply_and_verify.sh oneclick
 
 `apply_and_verify.sh` robi sam: preflight → hardening → testy → rollback przy
 braku SSH. Logi w `~/.local/share/hardening_runs/`.
+
+Zbierz stan systemu do jednego pliku, żeby mieć punkt odniesienia przed zmianami:
+
+```bash
+./system_audit.sh          # /tmp/system_audit_<data>.txt
+sudo ./system_audit.sh     # dochodzi /var/log/auth.log i crontab
+```
 
 Sam firewall, bez resty:
 
