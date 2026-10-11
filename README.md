@@ -14,9 +14,11 @@ i AppArmor. Uruchamiaj na maszynie, do której masz dostęp z innego miejsca —
 SSH, konsola providera albo fizyczny dostęp do klawiatury. Zmiany w `/etc/ssh`
 i reguły UFW potrafią odciąć Cię od systemu.
 
-Profil `aggressive` w `ufw_manager.sh` ustawia `default deny outgoing`, czyli
-**system przestaje widzieć internet** (działa tylko DNS). Na maszynie zdalnej
-to ryzyko utraty łączności. Domyślny i polecany jest `standard`.
+**Jeden skrypt nigdy nie blokuje ruchu wychodzącego.** Tryb `aggressive`
+(`deny outgoing`) był w tym repo i został usunięty 2026-10-11 — na maszynie
+zdalnej odcina SSH, a na VPS u providera zostawia bez jedynego kanału wejścia.
+Jeśli chcesz blokować wychodzące, ustaw to ręcznie i wcześniej sprawdź, czy
+masz drugi sposób dostępu do maszyny.
 
 ## Skrypty
 
@@ -25,7 +27,7 @@ to ryzyko utraty łączności. Domyślny i polecany jest `standard`.
 | `oneclick_harden.sh` | **One-click hardening**: SSH→klucze (blokada lockoutu), AppArmor, sysctl, AIDE, UFW w profilu `standard`. Robi backup przed zmianami i ma bezpiecznik — nie wyłącza haseł bez kluczy SSH. |
 | `preflight_check.sh` | Weryfikacja przed hardeningiem: klucz SSH, tryb SSH, backup konfiguracji, snapshot `ss`/`ufw`. |
 | `apply_and_verify.sh` | Uruchamia hardening, testuje, analizuje wynik i robi rollback przy krytycznym błędzie (brak SSH). |
-| `ufw_manager.sh` | Profile UFW: `standard` (blokuje wchodzące, zostawia wychodzące) / `aggressive` (`deny` na obu kierunkach). Wymaga `--yes`, robi `ufw --force reset` na wejściu. |
+| `ufw_manager.sh` | Reguły UFW: wchodzące `deny`, wychodzące `allow`. Bez argumentów. Resetuje UFW na wejściu. |
 | `security_report.sh` | Raport bezpieczeństwa: porty, SSH, UFW, AppArmor, AIDE. |
 | `system_check.sh` | Ogólny przegląd systemu: dysk, pamięć, failed services, błędy w logach, aktualizacje. |
 | `areknet_system_utils.sh` | Narzędzia systemowe w menu `dialog` (procesy, sieć, użytkownicy). |
@@ -47,7 +49,7 @@ braku SSH. Logi w `~/.local/share/hardening_runs/`.
 Sam firewall, bez resty:
 
 ```bash
-sudo ./ufw_manager.sh standard
+sudo ./ufw_manager.sh
 ```
 
 ## Uwagi

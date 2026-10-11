@@ -9,7 +9,7 @@ fi
 
 # Funkcja pomocy
 function show_help() {
-    HELP_TEXT="Firewall to cyfrowy strażnik Twojego komputera. UFW (Uncomplicated Firewall) to narzędzie, które nim zarządza.\n\n--- POJĘCIA ---\n\n🔹 PORT: Wyobraź sobie, że Twój komputer ma tysiące ponumerowanych drzwi. Każde drzwi (port) są przeznaczone dla konkretnej usługi (np. port 80 dla stron WWW, port 22 dla SSH).\n\n🔹 REGUŁA (ALLOW / DENY):\n- ALLOW: Otwierasz konkretne drzwi (port) dla określonego rodzaju ruchu.\n- DENY: Zamykasz konkretne drzwi (port).\n\n🔹 PROFIL STANDARD (Deny In / Allow Out):\nDomyślnie wszystkie drzwi wejściowe są zamknięte. Nikt nie wejdzie, jeśli nie jest zaproszony (brak reguły ALLOW). Ale programy z Twojego komputera mogą swobodnie wychodzić na zewnątrz (np. przeglądarka WWW). To bezpieczny, zrównoważony wybór.\n\n🔹 PROFIL AGRESYWNY (Deny In / Deny Out):\nWszystkie drzwi, zarówno wejściowe, jak i WYJŚCIOWE, są domyślnie zamknięte. Maksymalne bezpieczeństwo. Programy nie połączą się z internetem, dopóki nie stworzysz dla nich konkretnej reguły ALLOW na wyjście. Używaj, gdy wiesz, co robisz."
+    HELP_TEXT="Firewall to cyfrowy strażnik Twojego komputera. UFW (Uncomplicated Firewall) to narzędzie, które nim zarządza.\n\n--- POJĘCIA ---\n\n🔹 PORT: Wyobraź sobie, że Twój komputer ma tysiące ponumerowanych drzwi. Każde drzwi (port) są przeznaczone dla konkretnej usługi (np. port 80 dla stron WWW, port 22 dla SSH).\n\n🔹 REGUŁA (ALLOW / DENY):\n- ALLOW: Otwierasz konkretne drzwi (port) dla określonego rodzaju ruchu.\n- DENY: Zamykasz konkretne drzwi (port).\n\n🔹 PROFIL BEZPIECZNY (Deny In / Allow Out):\nDomyślnie wszystkie drzwi wejściowe są zamknięte. Nikt nie wejdzie, jeśli nie jest zaproszony (brak reguły ALLOW). Ale programy z Twojego komputera mogą swobodnie wychodzić na zewnątrz (np. przeglądarka WWW). To bezpieczny, zrównoważony wybór.\n\n🔹 RUCH WYCHODZĄCY:\nTen skrypt NIGDY nie blokuje ruchu wychodzącego. Dlaczego: na maszynie zdalnej zablokowanie wyjścia oznacza utratę SSH, a na VPS u providera utratę jedynego sposobu wejścia. Reguła jest jedna: wchodzące deny, wychodzące allow. Zmiana tego wymaga świadomej decyzji i drugiego kanału dostępu do maszyny."
 
     dialog --backtitle "AREKNET - Pomoc" --title "Wyjaśnienie pojęć" --msgbox "$HELP_TEXT" 30 80
 }
@@ -27,8 +27,7 @@ while true; do
                     "6" "Dodaj regułę ALLOW" \
                     "7" "Dodaj regułę DENY" \
                     "8" "Usuń regułę" \
-                    "9" "Zastosuj profil STANDARD" \
-                    "10" "Zastosuj profil AGRESYWNY" \
+                    "9" "Zastosuj profil bezpieczny" \
                     "H" "POMOC / Wyjaśnienie pojęć" \
                     "0" "Powrót do menu głównego" 2>&1 >/dev/tty)
 
@@ -90,10 +89,7 @@ while true; do
             fi
             ;;
         9)
-            bash ./ufw_manager.sh standard | dialog --title "Aplikowanie profilu STANDARD" --programbox 20 70
-            ;;
-        10)
-            bash ./ufw_manager.sh aggressive | dialog --title "Aplikowanie profilu AGRESYWNY" --programbox 20 70
+            bash ./ufw_manager.sh | dialog --title "Aplikowanie profilu" --programbox 20 70
             ;;
         H)
             show_help
