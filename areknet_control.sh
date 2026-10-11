@@ -23,14 +23,11 @@ while true; do
 
     case "$choice" in
         1)
-            mode=$(dialog --title "Tryb Hardeningu" --inputbox "Wybierz tryb: 'oneclick' lub 'hardcore'" 8 60 2>&1 >/dev/tty)
-            if [ -n "$mode" ]; then
-                clear
-                echo "Uruchamianie modułu Hardeningu w trybie: $mode"
-                bash ./apply_and_verify.sh "$mode"
-                echo -e "\nZakończono. Naciśnij Enter, aby wrócić do menu..."
-                read -r
-            fi
+            clear
+            echo "Uruchamianie modułu Hardeningu (oneclick)"
+            bash ./apply_and_verify.sh oneclick
+            echo -e "\nZakończono. Naciśnij Enter, aby wrócić do menu..."
+            read -r
             ;;
         2)
             bash ./areknet_firewall_menu.sh

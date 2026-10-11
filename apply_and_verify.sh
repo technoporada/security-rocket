@@ -1,7 +1,7 @@
 #!/bin/bash
 # apply_and_verify.sh
-# Uwaga: ten skrypt uruchamia wybraną wersję hardeningu (oneclick | hardcore),
-# wykonuje testy, analizuje, robi rollback w razie krytycznego błędu.
+# Ten skrypt uruchamia hardening w trybie oneclick, wykonuje testy,
+# analizuje wyniki i robi rollback w razie krytycznego błędu.
 set -euo pipefail
 MODE="${1:-}"
 LOGDIR="$HOME/.local/share/hardening_runs"
@@ -9,8 +9,8 @@ mkdir -p "$LOGDIR"
 RUN="$LOGDIR/apply_$(date +%Y%m%d_%H%M%S).log"
 echo "APPLY & VERIFY START $(date)" | tee "$RUN"
 
-if [[ "$MODE" != "oneclick" && "$MODE" != "hardcore" ]]; then
-  echo "Użycie: $0 {oneclick|hardcore}" | tee -a "$RUN"
+if [[ "$MODE" != "oneclick" ]]; then
+  echo "Użycie: $0 oneclick" | tee -a "$RUN"
   exit 2
 fi
 
@@ -18,17 +18,9 @@ fi
 echo "1) Preflight check..." | tee -a "$RUN"
 bash ./preflight_check.sh 2>&1 | tee -a "$RUN"
 
-# 2) uruchom wybrany hardening
-echo "2) Uruchamiam $MODE ..." | tee -a "$RUN"
-if [ "$MODE" = "oneclick" ]; then
-  bash ./oneclick_harden.sh 2>&1 | tee -a "$RUN"
-else
-  if [ -f ./OLD/hardcore_extreme.sh ]; then
-    bash ./OLD/hardcore_extreme.sh 2>&1 | tee -a "$RUN"
-  else
-    echo "UWAGA: brak ./OLD/hardcore_extreme.sh - pomijam tryb hardcore" | tee -a "$RUN"
-  fi
-fi
+# 2) uruchom hardening
+echo "2) Uruchamiam oneclick ..." | tee -a "$RUN"
+bash ./oneclick_harden.sh 2>&1 | tee -a "$RUN"
 
 # krótkie opóźnienie, dać systemowi czas na reload usług
 sleep 2
@@ -72,18 +64,16 @@ fi
 
 # 5) Analiza wyników i decyzja
 echo "5) Analiza wyników..." | tee -a "$RUN"
-# Krytyczne: SSH nie działa lub (w trybie oneclick) brak dostępu do sieci podstawowej?
+# Krytyczne: SSH nie działa. Brak sieci wychodzącej to ostrzeżenie, nie błąd —
+# zdarza się przy ręcznie ustawionym 'deny outgoing'.
 CRIT=0
 if [ "$SSH_OK" -eq 0 ]; then
   echo "  CRITICAL: SSH brak - wymagana natychmiastowa reakcja" | tee -a "$RUN"
   CRIT=1
 fi
 
-# W hardcore: brak HTTP/HTTPS to przewidywane jeśli deny outgoing, więc nie traktujemy jako CRIT
-if [ "$MODE" = "oneclick" ]; then
-  if [ "$HTTP_OK" -eq 0 ]; then
-    echo "  WARNING: W trybie oneclick HTTP/HTTPS nie działają - sprawdź reguły wychodzące" | tee -a "$RUN"
-  fi
+if [ "$HTTP_OK" -eq 0 ]; then
+  echo "  WARNING: HTTP/HTTPS nie działają - sprawdź reguły wychodzące" | tee -a "$RUN"
 fi
 
 # Jeśli krytyczne, wykonaj rollback
@@ -117,6 +107,6 @@ if [ "$CRIT" -eq 1 ]; then
 fi
 
 # 7) Zapis końcowy i zamknięcie
-echo "7) Wszystko OK (lub akceptowalny stan dla hardcore). Zapisuję log: $RUN" | tee -a "$RUN"
+echo "7) Wszystko OK. Zapisuję log: $RUN" | tee -a "$RUN"
 echo "$(date --iso-8601=seconds) - wykonałem: $MODE" >> "$LOGDIR/history.txt"
 echo "Koniec." | tee -a "$RUN"
